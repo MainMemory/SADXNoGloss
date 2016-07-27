@@ -1,3 +1,6 @@
 [submodule "sadx-mod-loader"]
 	path = sadx-mod-loader
 	url = git://github.com/sonicretro/sadx-mod-loader
+[submodule "mod-loader-common"]
+	path = mod-loader-common
+	url = git://github.com/sonicretro/mod-loader-common

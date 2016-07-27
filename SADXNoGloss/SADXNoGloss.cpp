@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include <vector>
 #include "..\sadx-mod-loader\SADXModLoader\include\SADXModLoader.h"
+#include "..\mod-loader-common\ModLoaderCommon\IniFile.hpp"
 
 using std::vector;
 
@@ -24,8 +25,6 @@ arrayinfo arraylist[] = {
 	{ "___AMY_OBJECTS", 39, arraytype_objects },
 	{ "___AMY_ACTIONS", 80, arraytype_actions },
 	{ "___AMY_MODELS", 6, arraytype_models },
-	{ "___E102_OBJECTS", 28, arraytype_objects },
-	{ "___E102_ACTIONS", 78, arraytype_actions },
 	{ "___BIG_OBJECTS", 46, arraytype_objects },
 	{ "___BIG_ACTIONS", 90, arraytype_actions },
 	{ "___BIG_MODELS", 4, arraytype_models }
@@ -64,11 +63,37 @@ void processobject(NJS_OBJECT *obj)
 	} while (obj);
 }
 
+void ignoreobject(NJS_OBJECT *obj)
+{
+	do {
+		if (checkaddrvisited(obj))
+			return;
+		if (obj->child)
+			processobject(obj->child);
+		obj = obj->sibling;
+	} while (obj);
+}
+
 extern "C"
 {
 	__declspec(dllexport) void Init(const char *path, const HelperFunctions &helperFunctions)
 	{
+		const IniFile *settings = new IniFile(std::string(path) + "\\mod.ini");
 		HMODULE hmodule = GetModuleHandle(L"CHRMODELS_orig");
+		if (settings->getBool("", "SuperSonicGloss"))
+		{
+			void **listaddr = (void **)GetProcAddress(hmodule, "___SONIC_OBJECTS");
+			ignoreobject((NJS_OBJECT *)listaddr[22]);
+			listaddr = (void **)GetProcAddress(hmodule, "___SONIC_ACTIONS");
+			visitedaddrs.push_back(((NJS_ACTION *)listaddr[142])->object);
+		}
+		if (settings->getBool("", "MetalSonicGloss"))
+		{
+			void **listaddr = (void **)GetProcAddress(hmodule, "___SONIC_OBJECTS");
+			ignoreobject((NJS_OBJECT *)listaddr[68]);
+			ignoreobject((NJS_OBJECT *)listaddr[69]);
+			ignoreobject((NJS_OBJECT *)listaddr[70]);
+		}
 		for (size_t i = 0; i < LengthOfArray(arraylist); i++)
 		{
 			void *listaddr = (void *)GetProcAddress(hmodule, arraylist[i].name);
@@ -109,6 +134,24 @@ extern "C"
 			}
 			}
 		}
+		if (!settings->getBool("", "GammaGloss"))
+		{
+			NJS_OBJECT **objlist = (NJS_OBJECT **)GetProcAddress(hmodule, "___E102_OBJECTS");
+			for (int j = 0; j < 28; j++)
+			{
+				if (*objlist != nullptr)
+					processobject(*objlist);
+				++objlist;
+			}
+			NJS_ACTION **actlist = (NJS_ACTION **)GetProcAddress(hmodule, "___E102_ACTIONS");
+			for (int j = 0; j < 78; j++)
+			{
+				if (*actlist != nullptr)
+					processobject((*actlist)->object);
+				++actlist;
+			}
+		}
+		delete settings;
 	}
 
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };
