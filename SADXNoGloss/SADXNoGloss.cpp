@@ -80,23 +80,24 @@ extern "C"
 	{
 		const IniFile *settings = new IniFile(std::string(path) + "\\mod.ini");
 		HMODULE hmodule = GetModuleHandle(L"CHRMODELS_orig");
+		void **listaddr;
 		if (settings->getBool("", "SuperSonicGloss"))
 		{
-			void **listaddr = (void **)GetProcAddress(hmodule, "___SONIC_OBJECTS");
+			listaddr = (void **)GetProcAddress(hmodule, "___SONIC_OBJECTS");
 			ignoreobject((NJS_OBJECT *)listaddr[22]);
 			listaddr = (void **)GetProcAddress(hmodule, "___SONIC_ACTIONS");
 			visitedaddrs.push_back(((NJS_ACTION *)listaddr[142])->object);
 		}
 		if (settings->getBool("", "MetalSonicGloss"))
 		{
-			void **listaddr = (void **)GetProcAddress(hmodule, "___SONIC_OBJECTS");
+			listaddr = (void **)GetProcAddress(hmodule, "___SONIC_OBJECTS");
 			ignoreobject((NJS_OBJECT *)listaddr[68]);
 			ignoreobject((NJS_OBJECT *)listaddr[69]);
 			ignoreobject((NJS_OBJECT *)listaddr[70]);
 		}
 		for (size_t i = 0; i < LengthOfArray(arraylist); i++)
 		{
-			void *listaddr = (void *)GetProcAddress(hmodule, arraylist[i].name);
+			listaddr = (void **)GetProcAddress(hmodule, arraylist[i].name);
 			switch (arraylist[i].type)
 			{
 			case arraytype_objects:
@@ -151,6 +152,16 @@ extern "C"
 				++actlist;
 			}
 		}
+		hmodule = GetModuleHandle(L"ADV03MODELS");
+		{
+			NJS_OBJECT **objlist = (NJS_OBJECT **)GetProcAddress(hmodule, "___ADV03_OBJECTS");
+			processobject(objlist[3]); // tribe echidna
+			processobject(objlist[5]); // tribe echidna
+			processobject(objlist[6]); // tribe echidna
+			processobject(objlist[7]); // pacman
+		}
+		processobject((NJS_OBJECT *)0x89C830); // eggman
+		processobject((NJS_OBJECT *)0x8D4880); // tikal
 		delete settings;
 	}
 
