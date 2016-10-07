@@ -69,7 +69,7 @@ void ignoreobject(NJS_OBJECT *obj)
 		if (checkaddrvisited(obj))
 			return;
 		if (obj->child)
-			processobject(obj->child);
+			ignoreobject(obj->child);
 		obj = obj->sibling;
 	} while (obj);
 }
