@@ -162,6 +162,7 @@ extern "C"
 		}
 		processobject((NJS_OBJECT *)0x89C830); // eggman
 		processobject((NJS_OBJECT *)0x8D4880); // tikal
+		processobject((NJS_OBJECT *)0x8D8AE8); // tikal talking head
 		visitedaddrs.clear();
 		delete settings;
 	}
