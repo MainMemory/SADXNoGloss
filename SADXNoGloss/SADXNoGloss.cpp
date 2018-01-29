@@ -78,7 +78,7 @@ extern "C"
 {
 	__declspec(dllexport) void Init(const char *path, const HelperFunctions &helperFunctions)
 	{
-		const IniFile *settings = new IniFile(std::string(path) + "\\mod.ini");
+		const IniFile *settings = new IniFile(std::string(path) + "\\config.ini");
 		HMODULE hmodule = GetModuleHandle(L"CHRMODELS_orig");
 		void **listaddr;
 		if (settings->getBool("", "SuperSonicGloss"))
